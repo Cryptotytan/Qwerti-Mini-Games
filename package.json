@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Qwerti Puzzle Game with Universal Leaderboard",
   "dependencies": {
-    "@vercel/kv": "^1.0.0"
+    "@upstash/redis": "^1.34.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": "18"
   }
 }
