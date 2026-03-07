@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Qwerti Puzzle</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+
+<!-- Invisible YouTube players -->
+<iframe id="yt-easy"   src="about:blank" allow="autoplay"></iframe>
+<iframe id="yt-normal" src="about:blank" allow="autoplay"></iframe>
+<iframe id="yt-hard"   src="about:blank" allow="autoplay"></iframe>
+
+<!-- CONNECT -->
+<div id="screen-connect" class="screen active">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div class="logo-icon"></div>
+    <div class="logo-bar"></div>
+  </div>
+  <div>
+    <div class="title-big">QWERTI<br><span class="title-accent">PUZZLE</span></div>
+    <div class="subtitle">reconstruct the logo · race the clock</div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="x-icon-wrap">𝕏</div>
+      <div>
+        <div style="font-weight:800;font-size:0.95rem;color:var(--text)">Connect via Twitter / X</div>
+        <div style="font-size:0.65rem;color:var(--dim);margin-top:2px">Your handle will appear on the global leaderboard</div>
+      </div>
+    </div>
+    <div>
+      <label class="input-label">Twitter handle</label>
+      <div class="input-wrap">
+        <span class="input-at">@</span>
+        <input id="handle-input" class="handle-input" placeholder="yourtwittername" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false"/>
+      </div>
+    </div>
+    <div id="handle-err" class="err-msg" style="display:none"></div>
+    <button class="btn-connect" onclick="doConnect()"><span>𝕏</span> Connect &amp; Play</button>
+    <div class="hint-text">Your best times compete on a global leaderboard.<br>No password needed.</div>
+  </div>
+  <a href="https://app.qwerti.ai?ref=67c-01008" target="_blank" class="app-btn"><span>⚡</span>Try the Qwerti App</a>
+</div>
+
+<!-- LEVELS -->
+<div id="screen-levels" class="screen">
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="showScreen('connect')">← Change Handle</button>
+    <div class="handle-badge"><span style="color:var(--mg)">𝕏</span><span id="levels-handle" style="font-weight:700;font-size:0.82rem"></span></div>
+  </div>
+  <div style="text-align:center">
+    <div style="font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem)">Select Difficulty</div>
+    <div id="levels-bests" style="margin-top:8px;font-size:0.68rem;color:var(--mid)"></div>
+  </div>
+  <div class="levels-grid">
+    <div class="lvl-card" onclick="startGame('easy')">
+      <div class="lvl-tag" style="color:var(--green)"><div class="lvl-dot" style="background:var(--green);box-shadow:0 0 8px var(--green)"></div>easy</div>
+      <div class="lvl-label">Initiate</div>
+      <div class="lvl-desc">8 tiles · gentle intro</div>
+    </div>
+    <div class="lvl-card" onclick="startGame('normal')">
+      <div class="lvl-tag" style="color:var(--gold)"><div class="lvl-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></div>normal</div>
+      <div class="lvl-label">Builder</div>
+      <div class="lvl-desc">12 tiles · moderate challenge</div>
+    </div>
+    <div class="lvl-card" onclick="startGame('hard')">
+      <div class="lvl-tag" style="color:var(--red)"><div class="lvl-dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></div>hard</div>
+      <div class="lvl-label">Architect</div>
+      <div class="lvl-desc">20 tiles · chaos mode</div>
+    </div>
+  </div>
+  <button class="btn-ghost" onclick="showLeaderboard()">🌍 Global Leaderboard →</button>
+  <a href="https://app.qwerti.ai?ref=67c-01008" target="_blank" class="app-btn"><span>⚡</span>Try the Qwerti App</a>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen screen-game">
+  <div class="game-header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn-ghost" onclick="doBack()">← Back</button>
+      <div id="game-lvl-badge" class="level-badge"></div>
+    </div>
+    <div id="timer" class="timer">00:00</div>
+  </div>
+  <div class="handle-row">
+    <span style="color:var(--mg)">𝕏</span>
+    <span id="game-handle" style="font-weight:700;color:var(--text)"></span>
+    <span id="game-best" style="color:var(--dim);margin-left:4px"></span>
+  </div>
+  <div class="hint-row">drag tiles to swap · hit check when ready</div>
+  <div class="board-wrap">
+    <div class="board-frame">
+      <div class="board-inner"><div id="board" class="board-grid"></div></div>
+    </div>
+  </div>
+  <div class="action-row">
+    <button class="btn-primary btn-check" onclick="doCheck()">✓ Check Placement</button>
+    <button class="btn-ghost" onclick="doShuffle()">↺ Shuffle</button>
+  </div>
+  <div id="game-msg" class="msg-text" style="display:none"></div>
+  <a href="https://app.qwerti.ai?ref=67c-01008" target="_blank" class="app-btn" style="margin-top:4px"><span>⚡</span>Try the Qwerti App</a>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="screen-leaderboard" class="screen">
+  <div class="nav-row" style="max-width:640px">
+    <div style="font-weight:800;font-size:1.8rem">🌍 Global Leaderboard</div>
+    <button class="btn-ghost" onclick="showScreen('levels')">← Back</button>
+  </div>
+  <div class="lb-tabs">
+    <button class="lb-tab active" onclick="setLbTab('easy',this)">easy</button>
+    <button class="lb-tab" onclick="setLbTab('normal',this)">normal</button>
+    <button class="lb-tab" onclick="setLbTab('hard',this)">hard</button>
+  </div>
+  <div id="lb-loading" style="display:none;font-size:0.72rem;color:var(--dim);letter-spacing:0.12em">Loading...</div>
+  <div class="lb-table-wrap">
+    <table>
+      <thead><tr><th>Rank</th><th>Twitter / X</th><th>Best Time</th></tr></thead>
+      <tbody id="lb-body"></tbody>
+    </table>
+  </div>
+  <div style="font-size:0.6rem;color:var(--dim);text-align:center;max-width:400px;line-height:1.6">
+    Top 10 fastest times per difficulty · One entry per player · Updates live
+  </div>
+  <a href="https://app.qwerti.ai?ref=67c-01008" target="_blank" class="app-btn"><span>⚡</span>Try the Qwerti App</a>
+</div>
+
+<!-- WIN -->
+<div id="win-overlay" class="win-overlay">
+  <div class="win-card">
+    <div style="font-size:3rem">🎉</div>
+    <div style="font-weight:800;font-size:2.2rem;color:var(--mg);text-shadow:0 0 30px var(--mg)">Congratulations!</div>
+    <div style="font-weight:800;font-size:1rem;color:var(--text)">Logo Fully Restored!</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:0.82rem">
+      <span style="color:var(--mg)">𝕏</span><span id="win-handle" style="font-weight:700;color:var(--text)"></span>
+    </div>
+    <div style="color:var(--mid);font-size:0.9rem">Completed in<br>
+      <span id="win-time" style="font-weight:800;font-size:2rem;color:var(--text)"></span>
+    </div>
+    <div id="win-rank-msg" style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mg);background:var(--mdim);border-radius:8px;padding:8px 16px"></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn-primary" style="flex:1" onclick="playAgain()">Play Again</button>
+      <button class="btn-ghost" onclick="goToLeaderboard()">🌍 Leaderboard</button>
+    </div>
+    <button class="btn-ghost" style="width:100%" onclick="closeWin()">← Choose Level</button>
+    <a href="https://app.qwerti.ai?ref=67c-01008" target="_blank" class="app-btn"><span>⚡</span>Try the Qwerti App</a>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
