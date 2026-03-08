@@ -59,10 +59,26 @@ module.exports = async function handler(req, res) {
     try {
       let entries = (await kv.get(KEY)) || [];
 
-      // One entry per user — remove old record if exists
-      entries = entries.filter(e => e.handle.toLowerCase() !== cleanHandle.toLowerCase());
+      // Check if this user already has an entry
+      const existing = entries.find(e => e.handle.toLowerCase() === cleanHandle.toLowerCase());
 
-      // Add new score
+      if (existing) {
+        // Only update if the new time is FASTER (lower) than their current best
+        if (time >= existing.time) {
+          // New score is slower or equal — keep existing best, return current standings
+          const rank = entries.findIndex(e => e.handle.toLowerCase() === cleanHandle.toLowerCase()) + 1;
+          return res.status(200).json({
+            level, entries,
+            rank: rank > 0 ? rank : null,
+            inTop10: rank > 0 && rank <= LB_MAX,
+            improved: false
+          });
+        }
+        // New score is faster — remove old entry so we can add the new best
+        entries = entries.filter(e => e.handle.toLowerCase() !== cleanHandle.toLowerCase());
+      }
+
+      // Add new best score
       entries.push({ handle: cleanHandle, time });
 
       // Sort fastest first, keep top 10
@@ -76,7 +92,8 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({
         level, entries,
         rank: rank > 0 ? rank : null,
-        inTop10: rank > 0 && rank <= LB_MAX
+        inTop10: rank > 0 && rank <= LB_MAX,
+        improved: true
       });
 
     } catch (err) {
